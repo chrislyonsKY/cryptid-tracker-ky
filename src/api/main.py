@@ -13,7 +13,6 @@ import redis.asyncio as aioredis
 from confluent_kafka import Producer
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
@@ -109,16 +108,7 @@ app.include_router(community.router, prefix="/api")
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 if FRONTEND_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
-
-
-@app.get("/", include_in_schema=False)
-async def serve_index():
-    """Serve the frontend index.html."""
-    index_path = FRONTEND_DIR / "index.html"
-    if index_path.exists():
-        return FileResponse(str(index_path))
-    return {"message": "Cryptid Tracker KY API — frontend not built yet"}
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
 
 
 @app.get("/api/health", response_model=HealthResponse, tags=["system"])
