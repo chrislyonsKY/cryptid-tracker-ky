@@ -166,19 +166,20 @@ const MapManager = (() => {
             source: 'sightings-heat',
             layout: { visibility: 'none' },
             paint: {
-                'heatmap-weight': ['interpolate', ['linear'], ['get', 'evidence_level'], 1, 0.2, 5, 1],
-                'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 6, 0.5, 12, 2],
-                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 6, 8, 12, 25],
+                'heatmap-weight': ['interpolate', ['linear'], ['get', 'evidence_level'], 1, 0.3, 5, 1],
+                'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 6, 1.2, 10, 2.5, 14, 4],
+                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 6, 25, 10, 35, 14, 50],
                 'heatmap-color': [
                     'interpolate', ['linear'], ['heatmap-density'],
                     0, 'rgba(0,0,0,0)',
-                    0.2, '#238636',
-                    0.4, '#3fb950',
-                    0.6, '#d29922',
+                    0.1, 'rgba(35,134,54,0.4)',
+                    0.25, '#238636',
+                    0.45, '#3fb950',
+                    0.65, '#d29922',
                     0.8, '#db6d28',
                     1.0, '#f85149',
                 ],
-                'heatmap-opacity': 0.7,
+                'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.8, 14, 0.6],
             },
         });
 
@@ -283,7 +284,7 @@ const MapManager = (() => {
                     <h3>${_escapeHtml(props.cryptid_name || props.cryptid_slug)}</h3>
                     <div class="popup-meta">
                         <span class="feed-evidence evidence-${props.evidence_level}">${evidenceLabels[props.evidence_level] || 'Unknown'}</span>
-                        · ${_formatDate(props.sighted_at)}
+                        · ${_formatDate(props.sighting_date || props.sighted_at)}
                     </div>
                     <p class="popup-description">${_escapeHtml(props.description || 'No description provided.')}</p>
                     <div class="popup-meta" style="margin-top:0.3rem">Reported by ${_escapeHtml(props.reporter_name || 'Anonymous')}</div>
@@ -337,7 +338,8 @@ const MapManager = (() => {
     function setSightingsData(geojson) {
         if (!map || !map.getSource('sightings')) return;
         map.getSource('sightings').setData(geojson);
-        map.getSource('sightings-heat').setData(geojson);
+        const heatSrc = map.getSource('sightings-heat');
+        if (heatSrc) heatSrc.setData(geojson);
         _announce(`Map updated with ${geojson.features ? geojson.features.length : 0} sightings`);
     }
 
