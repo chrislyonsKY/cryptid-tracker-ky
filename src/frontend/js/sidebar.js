@@ -141,8 +141,11 @@ const Sidebar = (() => {
             _formatNumber(stats.total_sightings || 0);
         document.getElementById('stat-30d').textContent =
             _formatNumber(stats.last_30_days || stats.sightings_30d || 0);
+        
+        // most_sighted is an object {slug, count} or null
+        const mostSighted = stats.most_sighted;
         document.getElementById('stat-most-sighted').textContent =
-            stats.most_sighted || '—';
+            mostSighted ? `${mostSighted.slug} (${mostSighted.count})` : '—';
     }
 
     function updateLeaderboard(entries) {
