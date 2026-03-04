@@ -54,11 +54,12 @@ async def lifespan(app: FastAPI):
             settings.valkey_uri,
             decode_responses=True,
             socket_connect_timeout=5,
+            ssl_cert_reqs=None,
         )
         await app.state.valkey_client.ping()
         logger.info("Valkey client connected")
     except Exception:
-        logger.exception("Failed to connect to Valkey")
+        logger.exception("Failed to connect to Valkey — cache features degraded")
         app.state.valkey_client = None
 
     yield

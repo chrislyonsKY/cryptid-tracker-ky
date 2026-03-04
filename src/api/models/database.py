@@ -15,11 +15,22 @@ logger = logging.getLogger(__name__)
 
 # --- PostgreSQL + PostGIS (async via asyncpg) ---
 
+# Strip ssl params from URI — asyncpg doesn't understand ?ssl=require
+_pg_uri = settings.pg_uri.replace("?ssl=require", "").replace("&ssl=require", "")
+
+# Create SSL context for asyncpg (Aiven PostgreSQL requires SSL)
+_pg_ssl = ssl.create_default_context()
+_pg_ssl.check_hostname = False
+_pg_ssl.verify_mode = ssl.CERT_NONE
+
 pg_engine = create_async_engine(
-    settings.pg_uri,
+    _pg_uri,
     echo=settings.debug,
-    pool_size=5,
-    max_overflow=10,
+    pool_size=3,
+    max_overflow=5,
+    pool_recycle=300,
+    pool_pre_ping=True,
+    connect_args={"ssl": _pg_ssl},
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -51,8 +62,10 @@ try:
     mysql_engine = create_async_engine(
         _mysql_uri,
         echo=settings.debug,
-        pool_size=5,
-        max_overflow=10,
+        pool_size=2,
+        max_overflow=3,
+        pool_recycle=300,
+        pool_pre_ping=True,
         connect_args={"ssl": _mysql_ssl},
     )
 except Exception as e:

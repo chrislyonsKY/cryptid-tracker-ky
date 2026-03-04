@@ -154,6 +154,8 @@ async def get_sightings(
 @router.get("/sightings/recent")
 async def get_recent_sightings(valkey=Depends(get_valkey)):
     """Get recent sightings from Valkey cache."""
+    if not valkey:
+        return []
     try:
         raw = await valkey.lrange("recent:sightings", 0, 49)
         return [json.loads(item) for item in raw]

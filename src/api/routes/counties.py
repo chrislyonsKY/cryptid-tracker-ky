@@ -43,12 +43,13 @@ async def get_counties(db: AsyncSession = Depends(get_db), valkey=Depends(get_va
 
     features = []
     for county in _counties_cache:
-        # Get cached threat data
+        # Get cached threat data (gracefully skip if Valkey unavailable)
         threat_data = {}
-        try:
-            threat_data = await valkey.hgetall(f"threat:{county['fips']}")
-        except Exception:
-            pass
+        if valkey:
+            try:
+                threat_data = await valkey.hgetall(f"threat:{county['fips']}")
+            except Exception:
+                pass
 
         threat_level = threat_data.get("level", "none")
         threat_score = float(threat_data.get("score", 0))
@@ -75,6 +76,14 @@ async def get_counties(db: AsyncSession = Depends(get_db), valkey=Depends(get_va
 @router.get("/counties/{fips}/threat")
 async def get_county_threat(fips: str, valkey=Depends(get_valkey)):
     """Get threat level detail for a specific county."""
+    if not valkey:
+        return {
+            "fips": fips,
+            "threat_level": "none",
+            "threat_score": 0,
+            "sighting_count": 0,
+            "top_cryptid": None,
+        }
     try:
         threat_data = await valkey.hgetall(f"threat:{fips}")
 

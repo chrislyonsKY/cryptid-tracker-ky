@@ -10,9 +10,21 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["stats"])
 
 
+_EMPTY_STATS = {
+    "total_sightings": 0,
+    "sightings_30d": 0,
+    "most_sighted": None,
+    "most_active_county": None,
+    "most_dangerous_county": None,
+    "evidence_breakdown": {},
+}
+
+
 @router.get("/stats")
 async def get_stats(valkey=Depends(get_valkey)):
     """Get global sighting statistics from Valkey cache."""
+    if not valkey:
+        return _EMPTY_STATS
     try:
         raw = await valkey.hgetall("stats:global")
 
@@ -63,6 +75,8 @@ async def get_stats(valkey=Depends(get_valkey)):
 @router.get("/stats/leaderboard")
 async def get_leaderboard(valkey=Depends(get_valkey)):
     """Get top sighting reporters from Valkey sorted set."""
+    if not valkey:
+        return []
     try:
         # ZREVRANGE with scores — top 10 reporters
         entries = await valkey.zrevrange("leaderboard:reporters", 0, 9, withscores=True)
