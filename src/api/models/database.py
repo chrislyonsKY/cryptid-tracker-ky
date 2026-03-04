@@ -15,8 +15,14 @@ logger = logging.getLogger(__name__)
 
 # --- PostgreSQL + PostGIS (async via asyncpg) ---
 
-# Strip ssl params from URI — asyncpg doesn't understand ?ssl=require
-_pg_uri = settings.pg_uri.replace("?ssl=require", "").replace("&ssl=require", "")
+# Strip ssl/sslmode params from URI — asyncpg doesn't understand them as query params
+_pg_uri = (
+    settings.pg_uri
+    .replace("?ssl=require", "")
+    .replace("&ssl=require", "")
+    .replace("?sslmode=require", "")
+    .replace("&sslmode=require", "")
+)
 
 # Create SSL context for asyncpg (Aiven PostgreSQL requires SSL)
 _pg_ssl = ssl.create_default_context()
