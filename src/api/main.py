@@ -144,8 +144,21 @@ async def health_check():
     except Exception:
         service_status["valkey"] = "error"
 
-    # Kafka (basic check — producer exists)
-    service_status["kafka"] = "ok" if getattr(app.state, "kafka_producer", None) else "not_initialized"
+    # Kafka (lightweight heartbeat produce)
+    try:
+        producer = getattr(app.state, "kafka_producer", None)
+        if producer:
+            producer.produce(
+                topic="sighting-raw",
+                key=b"heartbeat",
+                value=b'{"type":"heartbeat"}',
+            )
+            producer.poll(0)
+            service_status["kafka"] = "ok"
+        else:
+            service_status["kafka"] = "not_initialized"
+    except Exception:
+        service_status["kafka"] = "error"
 
     # MySQL
     try:

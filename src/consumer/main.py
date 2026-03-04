@@ -115,6 +115,12 @@ def run_consumer() -> None:
 
             try:
                 sighting = json.loads(msg.value().decode("utf-8"))
+
+                # Skip health-check heartbeat messages
+                if sighting.get("type") == "heartbeat":
+                    logger.debug("Skipping heartbeat message")
+                    continue
+
                 sighting_id = sighting.get("sighting_id", "unknown")
                 logger.info("Received sighting %s", sighting_id)
 
