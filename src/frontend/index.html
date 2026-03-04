@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptid Tracker KY — Real-time Kentucky Cryptid Sighting Monitor</title>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Skip navigation link for keyboard users -->
+    <a href="#map" class="sr-only sr-only-focusable" id="skip-nav">Skip to map</a>
+
+    <div id="app">
+        <!-- Live region for dynamic announcements -->
+        <div id="a11y-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" aria-label="Sighting controls and data">
+            <div class="sidebar-header">
+                <h1>🦶 Cryptid Tracker KY</h1>
+                <p class="subtitle">Real-time Kentucky Cryptid Sighting Monitor</p>
+            </div>
+
+            <!-- Tab navigation -->
+            <div class="tabs" role="tablist" aria-label="Sidebar panels">
+                <button class="tab active" data-tab="feed" role="tab" id="tab-feed"
+                        aria-selected="true" aria-controls="panel-feed" tabindex="0">Live Feed</button>
+                <button class="tab" data-tab="stats" role="tab" id="tab-stats"
+                        aria-selected="false" aria-controls="panel-stats" tabindex="-1">Stats</button>
+                <button class="tab" data-tab="filter" role="tab" id="tab-filter"
+                        aria-selected="false" aria-controls="panel-filter" tabindex="-1">Filter</button>
+                <button class="tab" data-tab="submit" role="tab" id="tab-submit"
+                        aria-selected="false" aria-controls="panel-submit" tabindex="-1">Report</button>
+                <button class="tab" data-tab="about" role="tab" id="tab-about"
+                    aria-selected="false" aria-controls="panel-about" tabindex="-1">About</button>
+            </div>
+
+            <!-- Live Feed Panel -->
+            <div class="tab-panel active" id="panel-feed" role="tabpanel"
+                 aria-labelledby="tab-feed" tabindex="0">
+                <div id="live-feed" aria-live="polite" aria-relevant="additions">
+                    <p class="loading">Loading recent sightings...</p>
+                </div>
+            </div>
+
+            <!-- Stats Panel -->
+            <div class="tab-panel" id="panel-stats" role="tabpanel"
+                 aria-labelledby="tab-stats" tabindex="0" hidden>
+                <div class="stats-grid" role="region" aria-label="Sighting statistics">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-total" aria-describedby="stat-total-label">—</div>
+                        <div class="stat-label" id="stat-total-label">Total Sightings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-30d" aria-describedby="stat-30d-label">—</div>
+                        <div class="stat-label" id="stat-30d-label">Last 30 Days</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-most-sighted" aria-describedby="stat-most-label">—</div>
+                        <div class="stat-label" id="stat-most-label">Most Sighted</div>
+                    </div>
+                </div>
+                <h3 id="leaderboard-heading">Top Reporters</h3>
+                <div id="leaderboard" role="list" aria-labelledby="leaderboard-heading">
+                    <p class="loading">Loading leaderboard...</p>
+                </div>
+            </div>
+
+            <!-- Filter Panel -->
+            <div class="tab-panel" id="panel-filter" role="tabpanel"
+                 aria-labelledby="tab-filter" tabindex="0" hidden>
+                <div class="filter-group">
+                    <label for="filter-cryptid">Cryptid Type</label>
+                    <select id="filter-cryptid">
+                        <option value="">All Cryptids</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-evidence">Min Evidence Level</label>
+                    <select id="filter-evidence">
+                        <option value="">Any</option>
+                        <option value="1">1 — Rustling Bushes</option>
+                        <option value="2">2 — Strange Sound</option>
+                        <option value="3">3 — Blurry Photo</option>
+                        <option value="4">4 — Clear Photo</option>
+                        <option value="5">5 — Physical Evidence</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+                <button class="btn btn-secondary" id="reset-filters">Reset</button>
+
+                <h3 style="margin-top: 1.5rem;" id="layers-heading">Map Layers</h3>
+                <fieldset class="toggle-group" aria-labelledby="layers-heading">
+                    <legend class="sr-only">Map Layer Visibility</legend>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-threat" checked>
+                        <span>County Threat Choropleth</span>
+                    </label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-markers" checked>
+                        <span>Sighting Markers</span>
+                    </label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-heatmap">
+                        <span>Heatmap Layer</span>
+                    </label>
+                </fieldset>
+            </div>
+
+            <!-- Submit Panel -->
+            <div class="tab-panel" id="panel-submit" role="tabpanel"
+                 aria-labelledby="tab-submit" tabindex="0" hidden>
+                <p class="hint">Click the map to set the sighting location, then fill out the form.</p>
+                <form id="sighting-form" aria-label="Report a sighting">
+                    <div class="form-group">
+                        <label for="submit-location">Location</label>
+                        <input type="text" id="submit-location" readonly
+                               placeholder="Click map to set location"
+                               aria-label="Selected sighting location (click map to set)">
+                    </div>
+                    <input type="hidden" id="submit-lat">
+                    <input type="hidden" id="submit-lon">
+                    <div class="form-group">
+                        <label for="submit-cryptid">Cryptid Type
+                            <span aria-hidden="true">*</span>
+                            <span class="sr-only">(required)</span>
+                        </label>
+                        <select id="submit-cryptid" required aria-required="true">
+                            <option value="">Select cryptid...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="submit-name">Your Name
+                            <span aria-hidden="true">*</span>
+                            <span class="sr-only">(required)</span>
+                        </label>
+                        <input type="text" id="submit-name" required aria-required="true"
+                               maxlength="100" placeholder="Daniel Boone">
+                    </div>
+                    <div class="form-group">
+                        <label for="submit-description">Description</label>
+                        <textarea id="submit-description" maxlength="2000" rows="3"
+                                  placeholder="Describe what you saw..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="submit-evidence">Evidence Level</label>
+                        <select id="submit-evidence">
+                            <option value="1">1 — Rustling Bushes</option>
+                            <option value="2">2 — Strange Sound</option>
+                            <option value="3" selected>3 — Blurry Photo</option>
+                            <option value="4">4 — Clear Photo</option>
+                            <option value="5">5 — Physical Evidence</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Report Sighting</button>
+                </form>
+                <div id="submit-result" class="hidden" role="alert" aria-live="assertive"></div>
+            </div>
+
+            <!-- About Panel -->
+            <div class="tab-panel" id="panel-about" role="tabpanel"
+                 aria-labelledby="tab-about" tabindex="0" hidden>
+                <h3>About the Developer</h3>
+                <div class="about-card">
+                    <p><strong>Chris Lyons</strong></p>
+                    <p>
+                        Built by a Kentucky-focused data + backend developer as an Aiven Free Tier Competition project.
+                    </p>
+                    <p>
+                        The app demonstrates real-time geospatial streaming with PostgreSQL + PostGIS, Apache Kafka,
+                        Valkey, and MySQL.
+                    </p>
+                    <p>
+                        Mission: make local folklore data explorable, transparent, and fun while showcasing practical cloud architecture.
+                    </p>
+                    <p class="about-links">
+                        <a href="https://github.com/chrislyonsKY" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
+                        <span aria-hidden="true"> · </span>
+                        <a href="https://www.linkedin.com/in/williamclyons/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map -->
+        <main id="map" role="application" aria-label="Interactive map of Kentucky showing cryptid sightings and county threat levels"></main>
+
+        <!-- Click marker popup template (hidden from accessibility tree) -->
+        <div id="popup-template" class="hidden" aria-hidden="true">
+            <div class="popup-content">
+                <h3 class="popup-title"></h3>
+                <div class="popup-meta"></div>
+                <p class="popup-description"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script>
+        // Global configuration
+        window.CONFIG = {
+            API_URL: window.location.origin + '/api',
+            POLL_INTERVAL: 30000, // 30 seconds
+        };
+    </script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
