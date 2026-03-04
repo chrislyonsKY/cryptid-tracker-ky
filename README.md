@@ -1,6 +1,8 @@
 # Cryptid Tracker KY
 
 ![Aiven Free Tier](https://img.shields.io/badge/Aiven-Free_Tier-FF5733?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0id2hpdGUiLz48L3N2Zz4=)
+![Render](https://img.shields.io/badge/Render-Deployed-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-Assisted-8957e5?style=for-the-badge&logo=githubcopilot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-PostGIS-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-Streaming-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
 ![Valkey](https://img.shields.io/badge/Valkey-Cache-DC382D?style=for-the-badge&logo=redis&logoColor=white)
