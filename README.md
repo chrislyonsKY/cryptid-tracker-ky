@@ -13,10 +13,6 @@
 ![Threat Level](https://img.shields.io/badge/KY_Threat_Level-EXTREME-7B0000?style=for-the-badge)
 ![Cryptids Tracked](https://img.shields.io/badge/Cryptids_Tracked-12-orange?style=for-the-badge)
 ![Bigfoot Danger](https://img.shields.io/badge/Bigfoot_Danger-★★★☆☆-8B4513?style=for-the-badge)
-```
-
-
-
 
 **Real-time Kentucky cryptid sighting tracker** — built for the [Aiven Free Tier Competition](https://aiven.io/blog/the-aiven-free-tier-competition).
 
@@ -33,7 +29,9 @@ Real historical data from the [BFRO](https://www.bfro.net/) (Bigfoot sightings) 
 ```
 User → FastAPI → Kafka (sighting-raw) → Consumer → PostgreSQL+PostGIS + Valkey
                                                   → Kafka (sighting-validated)
+
 Frontend (MapLibre GL) ← FastAPI ← PostgreSQL (spatial) + Valkey (cache)
+
 Community features (comments, votes) → MySQL
 ```
 
