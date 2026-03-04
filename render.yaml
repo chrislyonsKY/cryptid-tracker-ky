@@ -1,60 +1,20 @@
 services:
   - type: web
-    name: cryptid-tracker-ky-api
+    name: cryptid-tracker-ky
     runtime: python
     plan: free
-    region: oregon
-    branch: main
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.11
+        value: "3.11.0"
       - key: AIVEN_PG_URI
+        sync: false
+      - key: AIVEN_KAFKA_BOOTSTRAP_SERVERS
+        sync: false
+      - key: AIVEN_KAFKA_SECURITY_PROTOCOL
         sync: false
       - key: AIVEN_VALKEY_URI
         sync: false
       - key: AIVEN_MYSQL_URI
         sync: false
-      - key: AIVEN_KAFKA_BOOTSTRAP_SERVERS
-        sync: false
-      - key: AIVEN_KAFKA_SECURITY_PROTOCOL
-        value: SSL
-      - key: KAFKA_SSL_CA_BASE64
-        sync: false
-      - key: KAFKA_SSL_CERT_BASE64
-        sync: false
-      - key: KAFKA_SSL_KEY_BASE64
-        sync: false
-      - key: AIVEN_DEBUG
-        value: "false"
-
-  - type: worker
-    name: cryptid-tracker-ky-consumer
-    runtime: python
-    plan: free
-    region: oregon
-    branch: main
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m src.consumer.main
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.11
-      - key: AIVEN_PG_URI
-        sync: false
-      - key: AIVEN_VALKEY_URI
-        sync: false
-      - key: AIVEN_MYSQL_URI
-        sync: false
-      - key: AIVEN_KAFKA_BOOTSTRAP_SERVERS
-        sync: false
-      - key: AIVEN_KAFKA_SECURITY_PROTOCOL
-        value: SSL
-      - key: KAFKA_SSL_CA_BASE64
-        sync: false
-      - key: KAFKA_SSL_CERT_BASE64
-        sync: false
-      - key: KAFKA_SSL_KEY_BASE64
-        sync: false
-      - key: AIVEN_DEBUG
-        value: "false"
