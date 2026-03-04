@@ -68,6 +68,19 @@ body {
     letter-spacing: -0.02em;
 }
 
+.brand-title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.brand-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--text-primary);
+    flex: 0 0 auto;
+}
+
 .sidebar-header .subtitle {
     font-size: 0.8rem;
     color: var(--text-secondary);

@@ -4,7 +4,7 @@ import json
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
-from geoalchemy2.functions import ST_AsGeoJSON, ST_SimplifyPreserveTopology
+from geoalchemy2.functions import ST_AsGeoJSON, ST_Simplify
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,9 +29,7 @@ async def get_counties(db: AsyncSession = Depends(get_db), valkey=Depends(get_va
         query = select(
             KYCounty.fips,
             KYCounty.name,
-            ST_AsGeoJSON(
-                ST_SimplifyPreserveTopology(KYCounty.geom, 0.005)
-            ).label("geojson"),
+            ST_AsGeoJSON(ST_Simplify(KYCounty.geom, 0.01), 5).label("geojson"),
         )
         result = await db.execute(query)
         rows = result.all()

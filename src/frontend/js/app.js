@@ -8,6 +8,8 @@
 
     let pollTimer = null;
     let cryptids = [];
+    let sightingsRetryTimer = null;
+    let countiesRetryTimer = null;
 
     // ── Bootstrap ───────────────────────────────────────────
     window.addEventListener('map:ready', async () => {
@@ -57,8 +59,18 @@
             if (geojson && geojson.features) {
                 MapManager.setCountyData(geojson);
             }
+            if (countiesRetryTimer) {
+                clearTimeout(countiesRetryTimer);
+                countiesRetryTimer = null;
+            }
         } catch (err) {
             console.warn('[App] Failed to load counties:', err.message);
+            if (!countiesRetryTimer) {
+                countiesRetryTimer = setTimeout(() => {
+                    countiesRetryTimer = null;
+                    loadCounties();
+                }, 5000);
+            }
         }
     }
 
@@ -69,8 +81,18 @@
             if (geojson && geojson.features) {
                 MapManager.setSightingsData(geojson);
             }
+            if (sightingsRetryTimer) {
+                clearTimeout(sightingsRetryTimer);
+                sightingsRetryTimer = null;
+            }
         } catch (err) {
             console.warn('[App] Failed to load sightings:', err.message);
+            if (!sightingsRetryTimer) {
+                sightingsRetryTimer = setTimeout(() => {
+                    sightingsRetryTimer = null;
+                    loadSightings();
+                }, 5000);
+            }
         }
     }
 
